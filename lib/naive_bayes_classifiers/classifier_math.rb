@@ -8,13 +8,14 @@ module NaiveBayesClassifier
       end
     end
 
-    def self.variance arr
+
+    def self.sample_variance arr
       unless arr.empty?
         mean = mean(arr)
  
         arr.inject(0) do |sum, value|
           sum + (value - mean) ** 2
-        end / arr.length
+        end / (arr.length - 1)
       end
     end
   end

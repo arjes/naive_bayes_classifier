@@ -23,12 +23,32 @@ module NaiveBayesClassifier
       self.features == training_hash.keys.sort
     end
 
-    def calcualte_statistics_for klass
+    def classify target_features
+
+    end
+
+    def probability_of_feature klass, feature, value
+      variance = self.statistics[klass][feature][:variance]
+      mean     = self.statistics[klass][feature][:mean]
+      
+       Math.exp( -((value - mean) ** 2) / (2 * variance ) ) / 
+         Math.sqrt( 2 * Math::PI * variance )
+    end
+
+    def probability_of_klass klass
+      self.training_sets[klass].length.to_f / total_training_sets 
+    end
+
+    def total_training_sets
+      self.training_sets.values.map(&:length).inject(:+)
+    end
+
+    def calculate_statistics_for klass
       self.statistics[klass] = self.features.each_with_object({}) do |feature, obj|
         feature_values = self.training_sets[klass].map{|ts| ts[feature] }
 
         obj[feature] = {
-          variance: ClassifierMath.variance(feature_values),
+          variance: ClassifierMath.sample_variance(feature_values),
           mean: ClassifierMath.mean(feature_values)
         }
       end
@@ -37,9 +57,9 @@ module NaiveBayesClassifier
     def train! klass, training_sets
       training_sets = prune_training_sets(training_sets)
 
-      self.training_sets[klass.to_sym] << training_sets
+      self.training_sets[klass.to_sym] += training_sets
 
-      calcualte_statistics_for klass
+      calculate_statistics_for klass
     end
 
     def features= features

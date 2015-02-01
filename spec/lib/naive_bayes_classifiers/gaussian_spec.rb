@@ -6,9 +6,61 @@ module NaiveBayesClassifier
  
     let(:classifier) { Gaussian.new }
 
+
+    describe "#probability_of_feature" do
+      #Using the math already done on Wikipedia
+      before do
+        classifier.statistics[:male] = {
+         weight: { variance: 1.2292e2, mean: 176.25 }
+        }
+      end
+
+      it "returns the value of a position for a feature given a klass" do
+        expect(
+          classifier.probability_of_feature(:male, :weight, 130)
+        ).to be_within(0.001e-6).of( 5.9881e-6)
+      end
+    end
+
+    describe "#probability_of_klass" do
+      it "uses frequency of training sets to estimate" do
+        classifier.training_sets[:bar] = [ {} ] 
+        classifier.training_sets[:foo] = [ {}, {}] 
+
+        expect(classifier.probability_of_klass(:foo)).to eq( 2.0 / 3)
+      end
+    end
+
+    describe "#total_training_sets" do
+      it "sums total sets across all classes" do
+        classifier.training_sets[:bar] = [ {} ] 
+        classifier.training_sets[:foo] = [ {}, {}] 
+
+        expect(classifier.total_training_sets).to eq 3
+      end
+    end
+
     describe "#initialize" do
       it "accecpts default features" do
         expect(Gaussian.new(default_features: [:boo]).features).to eq [:boo]
+      end
+    end
+
+    describe "#calculate_statistics_for" do
+      before do
+        classifier.training_sets[:foo] = [ {foo: 5, bar: 123}, {foo: 10, bar:96}]
+        classifier.features = [:foo, :bar]
+      end
+
+      it "sets the stats for the given klass" do
+        expect{
+          classifier.calculate_statistics_for(:foo)
+        }.to change{ classifier.statistics[:foo] }.to(
+          {
+            foo: {mean: 7.5,   variance: 12.5},
+            bar: {mean: 109.5, variance: 364.5}
+          }
+        )
       end
     end
 
@@ -21,12 +73,12 @@ module NaiveBayesClassifier
 
       it "only appends valid training sets" do
         expect{
-          classifier.train!('foo', [ {omg: '123'}, {foo: 456} ])
-        }.to change{ classifier.training_sets[:foo].length }.from(0).to(1)
+          classifier.train!('foo', [ {omg: '123'}, {omg: 4123}, {foo: 456} ])
+        }.to change{ classifier.training_sets[:foo].length }.from(0).to(2)
       end
 
       it "calls calculate stats once for each call" do
-        expect(classifier).to receive(:calcualte_statistics_for).once
+        expect(classifier).to receive(:calculate_statistics_for).once
 
         classifier.train!('foo', [ {dude: 123} ])
       end

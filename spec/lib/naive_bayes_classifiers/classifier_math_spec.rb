@@ -13,16 +13,16 @@ module NaiveBayesClassifier
      end
    end 
 
-   describe "#variance" do
+   describe "#sample_variance" do
      it "returns nil if the array is empty" do
-       expect(ClassifierMath.variance([])).to be_nil
+       expect(ClassifierMath.sample_variance([])).to be_nil
      end
 
      it "returns the caluclate variance" do
        entries = [600, 470, 170, 430, 300]
-       var = 21_704
+       var = 27_130
 
-       expect(ClassifierMath.variance(entries)).to eq var
+       expect(ClassifierMath.sample_variance(entries)).to eq var
      end
    end
   end
