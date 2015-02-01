@@ -1,6 +1,5 @@
 
 
-
 module NaiveBayesClassifier
   class Gaussian
     DEFAULT_OPTIONS = {
@@ -12,8 +11,8 @@ module NaiveBayesClassifier
     attr_reader :features
 
     def initialize options = {}
-      self.options = DEFAULT_OPTIONS.merge(options)
-      self.training_sets = {}
+      self.options       = DEFAULT_OPTIONS.merge(options)
+      self.training_sets = Hash.new{|h, k| h[k] = [] }
       self.statistics    = {}
       self.features      = self.options[:default_features]
     end
@@ -25,11 +24,20 @@ module NaiveBayesClassifier
     end
 
     def calcualte_statistics_for klass
+      self.statistics[klass] = self.features.each_with_object({}) do |feature, obj|
+        feature_values = self.training_sets[klass].map{|ts| ts[feature] }
 
+        obj[feature] = {
+          variance: ClassifierMath.variance(feature_values),
+          mean: ClassifierMath.mean(feature_values)
+        }
+      end
     end
 
     def train! klass, training_sets
       training_sets = prune_training_sets(training_sets)
+
+      self.training_sets[klass.to_sym] << training_sets
 
       calcualte_statistics_for klass
     end

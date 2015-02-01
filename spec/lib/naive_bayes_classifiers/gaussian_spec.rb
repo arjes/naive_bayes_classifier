@@ -12,6 +12,26 @@ module NaiveBayesClassifier
       end
     end
 
+    describe "#train!" do
+      it "appends training sets to the training_sets array" do
+        expect{
+          classifier.train!('foo', [ {omg: '123'} ])
+        }.to change{ classifier.training_sets[:foo].length }.from(0).to(1)
+      end
+
+      it "only appends valid training sets" do
+        expect{
+          classifier.train!('foo', [ {omg: '123'}, {foo: 456} ])
+        }.to change{ classifier.training_sets[:foo].length }.from(0).to(1)
+      end
+
+      it "calls calculate stats once for each call" do
+        expect(classifier).to receive(:calcualte_statistics_for).once
+
+        classifier.train!('foo', [ {dude: 123} ])
+      end
+    end
+
     describe "#validate_feature_set" do
       it "intializes the features if not already set" do
         expect{ 
