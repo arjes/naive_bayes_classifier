@@ -23,4 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "simplecov", "~> 0.9.0"
   spec.add_development_dependency "guard", "~> 2.11.0"
   spec.add_development_dependency 'guard-rspec'
+  spec.add_development_dependency 'libnotify'
+  spec.add_development_dependency 'pry'
 end
