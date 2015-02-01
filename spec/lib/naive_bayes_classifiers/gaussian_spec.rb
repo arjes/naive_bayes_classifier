@@ -7,6 +7,30 @@ module NaiveBayesClassifier
     let(:classifier) { Gaussian.new }
 
 
+    describe "#posterior_numerator" do
+      #Using the math already done on Wikipedia
+      before do
+        classifier.statistics[:female] = {
+         weight:    { variance: 5.5833e2,  mean: 132.5 },
+         height:    { variance: 9.7225e-2, mean: 5.4175},
+         foot_size: { variance: 1.6667e0,  mean: 7.5   } 
+        }
+
+        classifier.features = [:weight, :height, :foot_size]
+      end
+     
+      it "returns 0 if the klass isn't set" do
+        expect(classifier.posterior_numerator(:foobar, {})).to eq 0
+      end
+
+      it "combines the probability of the klass with the probability of the features" do
+        allow(classifier).to receive(:probability_of_klass).and_return 0.5
+        expect(
+          classifier.posterior_numerator(:female, {height: 6, weight: 130, foot_size: 8})
+         ).to be_within(0.0001e-4).of(5.3778e-4)
+      end
+    end
+
     describe "#probability_of_feature" do
       #Using the math already done on Wikipedia
       before do

@@ -24,7 +24,23 @@ module NaiveBayesClassifier
     end
 
     def classify target_features
+      results = calculate_numerator_for_each_klass target_features
 
+      results.invert[results.values.max]
+    end
+
+    def calculate_numerator_for_each_klass target_features
+      self.training_sets.keys.each_with_object({}) do |klass, obj|
+        obj[klass] = posterior_numerator klass, target_features
+      end
+    end
+
+    def posterior_numerator klass, target_features
+      return 0 if !self.statistics[klass] or self.statistics[klass].empty?
+
+      self.probability_of_klass(klass) * self.features.collect do |feature|
+        probability_of_feature klass, feature, target_features[feature]
+      end.inject(:*)
     end
 
     def probability_of_feature klass, feature, value
